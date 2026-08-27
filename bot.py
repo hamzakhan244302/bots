@@ -10,7 +10,7 @@ import random, string, datetime, os
 
 # ── CONFIG ──
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "8667412702:AAFj3kzCwHbn4gorKtQEW5LtGC79KwbctsM")
-DB_HOST     = os.getenv("DB_HOST", "localhost")
+DB_HOST     = os.getenv("DB_HOST", "live.hostserverdns.in")
 DB_NAME     = os.getenv("DB_NAME", "battleg1_main")
 DB_USER     = os.getenv("DB_USER", "battleg1_main")
 DB_PASS     = os.getenv("DB_PASS", "battleg1_main")
@@ -467,7 +467,7 @@ async def block_user_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
 async def unblock_user_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    user = get_user(chat_id)
+    user= get_user(chat_id)
     if not user or user['level'] != 1:
         await update.callback_query.answer("❌ Owner only!", show_alert=True)
         return ConversationHandler.END
@@ -496,107 +496,4 @@ async def block_unblock_process(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
                 return ConversationHandler.END
         db.commit()
         emoji = "🚫" if action == 'block' else "✅"
-        word = "Blocked" if action == 'block' else "Unblocked"
-        await update.message.reply_text(f"{emoji} User `{target}` {word}!", parse_mode='Markdown')
-    except Exception as e:
-        await update.message.reply_text(f"❌ Error: {e}", parse_mode='Markdown')
-    finally:
-        try: db.close()
-        except: pass
-    return ConversationHandler.END
-
-async def back_to_menu(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    user = get_user(chat_id)
-    if not user or user['level'] == 0:
-        await update.callback_query.edit_message_text(
-            f"❌ No access!\nYour Chat ID: `{chat_id}`",
-            parse_mode='Markdown'
-        )
-        return ConversationHandler.END
-    name = get_level_name(user['level'])
-    await update.callback_query.edit_message_text(
-        f"👑 *Kartoos Elite Panel Bot*\n\n"
-        f"👤 User: `{user['username']}`\n"
-        f"🎯 Level: {name}\n\n"
-        f"Choose an option:",
-        parse_mode='Markdown',
-        reply_markup=main_menu(user['level'])
-    )
-    return ConversationHandler.END
-
-async def my_id(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    await update.message.reply_text(
-        f"💬 Your Chat ID: `{chat_id}`",
-        parse_mode='Markdown'
-    )
-
-async def cancel(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    user = get_user(chat_id)
-    if user and user['level'] > 0:
-        await update.message.reply_text("✅ Cancelled.", reply_markup=main_menu(user['level']))
-    return ConversationHandler.END
-
-# ── MAIN ──
-def main():
-    ensure_bot_table()
-
-    # Register owner automatically
-    register_user(7182189844, "hamzakhan24", 1)
-
-    app = Application.builder().token(BOT_TOKEN).build()
-
-    # Generate key conversation
-    gen_conv = ConversationHandler(
-        entry_points=[CallbackQueryHandler(generate_start, pattern="^generate$")],
-        states={
-            GEN_DURATION: [CallbackQueryHandler(generate_duration, pattern="^dur_"),
-                           CallbackQueryHandler(back_to_menu, pattern="^back$")],
-            GEN_DEVICES:  [CallbackQueryHandler(generate_devices, pattern="^dev_"),
-                           CallbackQueryHandler(back_to_menu, pattern="^back$")],
-        },
-        fallbacks=[CommandHandler("cancel", cancel)],
-        per_message=False
-    )
-
-    # Set level conversation
-    level_conv = ConversationHandler(
-        entry_points=[CallbackQueryHandler(set_level_start, pattern="^set_level$"),
-                      CallbackQueryHandler(block_user_start, pattern="^block_user$"),
-                      CallbackQueryHandler(unblock_user_start, pattern="^unblock_user$")],
-        states={
-            SET_LEVEL: [MessageHandler(filters.TEXT & ~filters.COMMAND, set_level_process),
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, block_unblock_process)],
-        },
-        fallbacks=[CommandHandler("cancel", cancel), CallbackQueryHandler(back_to_menu, pattern="^back$")],
-        per_message=False
-    )
-
-    # Balance conversation
-    bal_conv = ConversationHandler(
-        entry_points=[CallbackQueryHandler(add_balance_start, pattern="^add_balance$")],
-        states={
-            SET_BALANCE: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_balance_process)],
-        },
-        fallbacks=[CommandHandler("cancel", cancel), CallbackQueryHandler(back_to_menu, pattern="^back$")],
-        per_message=False
-    )
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("id", my_id))
-    app.add_handler(gen_conv)
-    app.add_handler(level_conv)
-    app.add_handler(bal_conv)
-    app.add_handler(CallbackQueryHandler(status, pattern="^status$"))
-    app.add_handler(CallbackQueryHandler(keys_info, pattern="^keys$"))
-    app.add_handler(CallbackQueryHandler(users_info, pattern="^users$"))
-    app.add_handler(CallbackQueryHandler(balance_menu, pattern="^balance_menu$"))
-    app.add_handler(CallbackQueryHandler(back_to_menu, pattern="^back$"))
-
-    logger.info("Bot started!")
-    app.run_polling(drop_pending_updates=True)
-
-if __name__ == "__main__":
-    main()
+        word = "Block
